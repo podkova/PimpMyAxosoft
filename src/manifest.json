@@ -1,0 +1,11 @@
+{
+    "name": "PimpMyAxosoft",
+    "description": "Axosoft UI improvements: make links in the comments and in the issue description clickable.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [],
+    "content_scripts": [{
+        "matches": ["https://*.axosoft.com/"],
+        "js": ["jquery-3.5.1.min.js", "axo.js"]
+      }]
+}
