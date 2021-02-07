@@ -1,7 +1,7 @@
 // https://stackoverflow.com/a/8943487
 let URL_REGEX =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 function linkifyText(text) {
-    return text.replace(URL_REGEX, function(url) {
+    return text.includes('href') ? text : text.replace(URL_REGEX, function(url) {
         return '<a href="' + url + '">' + url + '</a>';
     });
 }
@@ -88,3 +88,13 @@ mainObserver.observe(mainNode, mainConfig);
 // Fix style for links (prevents bolding and double underscore)
 let styleTag = $('<style>.comment-text a { border-bottom: 0 !important; font-weight: inherit !important; }</style>')
 $('html > head').append(styleTag);
+
+// Remove formatting from copied text (e.g. green background when copying comments)
+document.addEventListener("paste", function(e) {
+    e.preventDefault();
+    const text = (e.originalEvent || e).clipboardData.getData('text/html');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = text;
+    $(wrapper).find('*').removeAttr('style');
+    document.execCommand("insertHTML", false, wrapper.innerHTML);
+});
