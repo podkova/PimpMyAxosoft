@@ -18,7 +18,7 @@ let sidePanelDescCallback = function(mutationsList, observer) {
     for (var mutation of mutationsList) {
         if (mutation.target.className == "content")
             linkifyDOMElement(mutation.target);
-        else if (mutation.target.firstChild.className == "content")
+        else if (mutation.target.firstChild && mutation.target.firstChild.className == "content")
             linkifyDOMElement(mutation.target.firstChild);
     }
 }
