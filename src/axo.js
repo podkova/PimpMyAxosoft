@@ -43,7 +43,7 @@ var callback = function(mutationsList, observer) {
                         // Move comment's text BELOW the comment's author
                         $(this).insertAfter(meta);
 
-                        // Indent the comment's text slightly to differentiate it from the author's name
+                        // Adjust text padding
                         $(this).css('padding', '4px 10px 4px 0px');
 
                         // Convert dead links to hyperlinks
@@ -61,3 +61,7 @@ var targetNode = document.getElementById('gridHeader');
 var config = { childList: true, subtree: true };
 var observer = new MutationObserver(callback);
 observer.observe(targetNode, config);
+
+// Fix style for links (prevents bolding and double underscore)
+var styleTag = $('<style>.comment-text a { border-bottom: 0 !important; font-weight: inherit !important; }</style>')
+$('html > head').append(styleTag);
