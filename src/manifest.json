@@ -1,7 +1,7 @@
 {
     "name": "PimpMyAxosoft",
-    "description": "Axosoft UI improvements: make links in the comments and in the issue description clickable.",
-    "version": "1.0",
+    "description": "Axosoft UI improvements: clickable links and better comments.",
+    "version": "1.1",
     "manifest_version": 3,
     "content_scripts": [{
         "matches": ["https://*.axosoft.com/"],
