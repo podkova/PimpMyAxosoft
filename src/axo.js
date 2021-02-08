@@ -33,7 +33,8 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                 {
                     var jnode = $(node);
                     jnode.find("[class='field']").each(function(index){
-                        if ($(this).parent().prev().children().first().text() == "Description:") // Beware, web crawling voodoo
+                        if ($(this).parent().prev().children().first().text() == "Description:" // Match description editor and description viewer
+                            && $(this).find('#description').length == 0) // Discard description editor
                         {
                             // Convert dead links to hyperlinks
                             var txt = $(this).html();
