@@ -93,10 +93,12 @@ $('html > head').append(styleTag);
 
 // Remove formatting from copied text (e.g. green background when copying comments)
 document.addEventListener("paste", function(e) {
-    e.preventDefault();
     const text = (e.originalEvent || e).clipboardData.getData('text/html');
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = text;
-    $(wrapper).find('*').removeAttr('style');
-    document.execCommand("insertHTML", false, wrapper.innerHTML);
+    if (text) {
+        e.preventDefault();
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = text;
+        $(wrapper).find('*').removeAttr('style');
+        document.execCommand("insertHTML", false, wrapper.innerHTML);
+    }
 });
