@@ -15,10 +15,30 @@ function linkifyDOMElement(domElem) {
 
 var gCommentsSection = null;
 
-function refreshAdvancedComments()
-{
-    const list = $(gCommentsSection).find('li.selectable');
-    $('<li>test</li>').insertAfter(list.first());
+function addUberViewEvent(afterElem, author, date, text) {
+
+    const newElem = $('<li class="axo-lightgrid-item selectable" id="aui-3-18-0-4_39657">' +
+    '    <div class="comment-body htmlreset">' +
+    '        <div class="comment-container">' +
+    '            <div class="comment-content">' +
+    '                <div class="comment-meta" style="text-align: left; padding: 3px; margin: 0px; background: rgb(215, 224, 224);">' +
+    '                    <span class="comment-author" style="font-weight: bold; font-size: 12px; font-style: normal; max-width: inherit; vertical-align: sub;">' + author + '</span>' +
+    '                    <span class="comment-time">' + date + '</span>' +
+    '                </div>' +
+    '                <div class="comment-text" style="padding: 4px 10px 4px 0px;">' + text + '</div>' +
+    '            </div>' +
+    '        </div>' +
+    '    </div>' +
+    '</li>');
+
+    newElem.insertAfter(afterElem);
+}
+
+function refreshAdvancedComments() {
+    const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
+    const commentList = $(gCommentsSection).find('li.selectable');
+
+    addUberViewEvent(commentList.first(), 'John Silverfoot', '08/12/2020 12:01', 'We have ' + historyList.length + ' history items');
 }
 
 let sidePanelDescCallback = function(mutationsList, observer) {
