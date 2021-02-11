@@ -13,6 +13,14 @@ function linkifyDOMElement(domElem) {
     jElem.html(txt);
 }
 
+var gCommentsSection = null;
+
+function refreshAdvancedComments()
+{
+    const list = $(gCommentsSection).find('li.selectable');
+    $('<li>test</li>').insertAfter(list.first());
+}
+
 let sidePanelDescCallback = function(mutationsList, observer) {
     // Description - side panel
     for (var mutation of mutationsList) {
@@ -31,17 +39,39 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                 // Description - issue view
                 if (node.className == "item-field-table")
                 {
-                    var jnode = $(node);
+                    let commentsHandled = false;
+                    let descHandled = false;
+                    let jnode = $(node);
                     jnode.find("[class='field']").each(function(index){
                         if ($(this).parent().prev().children().first().text() == "Description:" // Match description editor and description viewer
                             && $(this).find('#description').length == 0) // Discard description editor
                         {
                             // Convert dead links to hyperlinks
-                            var txt = $(this).html();
+                            let txt = $(this).html();
                             txt = linkifyText(txt);
                             $(this).html(txt);
 
-                            return false; // break each()
+                            descHandled = true;
+                            if (commentsHandled)
+                                return false; // break each()
+                        }
+                        else if ($(this).parent().prev().children().first().text() == "Comments:") // Match comments viewer
+                        {
+                            gCommentsSection = this;
+
+                            $(this).parent().prev().children().first().html(
+                                "Comments: <a " +
+                                "style=\"float: right; font-size: 9px; margin-top: -10px\" " +
+                                // "onclick=\"refreshAdvancedComments()\" "+
+                                "id=\"adv-comments-button\" " +
+                                "class=\"button button--basic button--small axo-menuitem-content\">" +
+                                "Advanced</a>");
+
+                            $("#adv-comments-button").on('click', refreshAdvancedComments);
+
+                            commentsHandled = true;
+                            if (descHandled)
+                                return false; // break each()                           
                         }
                     });
                 }
