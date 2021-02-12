@@ -103,11 +103,6 @@ function refreshAdvancedCommentsDelayed() {
         });
         if (content.length != 0)
             addUberViewSimpleEvent(commentList.first(), author, dateStr, dateData, content);
-
-        // if (content.length != 0) {
-        //     content = '<span style="font-size: 12px">' + content + '</span>';
-        //     addUberViewEvent(commentList.first(), author, dateStr, dateData, content);                
-        // }
     });
 
     const newCommentList = $(gCommentsSection).find('li.selectable');
