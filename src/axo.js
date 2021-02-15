@@ -168,6 +168,7 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                             const commentLoadTimestamp = Date.now();
 
                             $(this).find("#adv-comments-button").on('click', function() {
+                                $(this).unbind('click');
                                 refreshAdvancedComments(commentsSection, commentLoadTimestamp);
                             });
 
