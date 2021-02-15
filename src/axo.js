@@ -73,8 +73,8 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
         $(this).attr('data-timestamp', dateData);
     });
 
+    // History list
     const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
-
     historyList.each(function(){
         const dateStr = $(this).find('.body').first().text().replace('on ', '').replace(' at', '');
         const dateData = Date.parse(dateStr.substring(3, 6) + dateStr.substring(0, 3) + dateStr.substring(6, 100)).toString();
@@ -103,6 +103,18 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
         });
         if (content.length != 0)
             addUberViewSimpleEvent(commentList.first(), author, dateStr, dateData, content);
+    });
+
+    // SVN commits list
+    const issueId = $('label.item-field-id').text().trim();
+    const commitList = $('.axo-sourcecontrolcommitui-content').find('li.commit');
+    commitList.each(function(){
+        const dateStr = $(this).find('.commit-date').text().trim().replace('On ', '').replace('at ', '');
+        const dateData = Date.parse(dateStr.substring(3, 6) + dateStr.substring(0, 3) + dateStr.substring(6, 100)).toString();
+
+        const content = $(this).find('.message').text().replace('[axof: ' + issueId + '] ', '').replace('[axot: ' + issueId + '] ', '').replace('(rev: ', 'SVN commit <b>r').replace(')', '</b>: ');
+
+        addUberViewSimpleEvent(commentList.first(), '', dateStr, dateData, content);
     });
 
     const newCommentList = $(commentsSection).find('li.selectable');
@@ -161,7 +173,9 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
 
                             const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
                             historyList.each(function(){
-                                $(this).find('.fa-plus-square-o')[0].click();
+                                const plus = $(this).find('.fa-plus-square-o');
+                                if (plus.children().length != 0)
+                                    plus[0].click();
                             });
 
                             commentsHandled = true;
