@@ -13,8 +13,6 @@ function linkifyDOMElement(domElem) {
     jElem.html(txt);
 }
 
-var gCommentsSection = null;
-
 function addUberViewEvent(afterElem, author, date, timestamp, content) {
 
     const newElem = $('<li style="margin-left: 25px" class="axo-lightgrid-item selectable" data-timestamp="' + timestamp + '">' +
@@ -55,18 +53,19 @@ function addUberViewSimpleEvent(afterElem, author, date, timestamp, content) {
     newElem.insertAfter(afterElem);
 }
 
-function refreshAdvancedComments() {
-    const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
+function refreshAdvancedComments(commentsSection, commentLoadTimestamp) {
+    const minRequiredTimeout = 4000;
+    const timePassed = Date.now() - commentLoadTimestamp;
+    const actualTimeout = minRequiredTimeout - timePassed;
 
-    historyList.each(function(){
-        $(this).find('.fa-plus-square-o')[0].click();
-    });
-
-    setTimeout(() => { refreshAdvancedCommentsDelayed(); }, 4000);
+    if (actualTimeout <= 0)
+        refreshAdvancedCommentsDelayed(commentsSection);
+    else
+        setTimeout(() => { refreshAdvancedCommentsDelayed(commentsSection); }, actualTimeout);
 }
 
-function refreshAdvancedCommentsDelayed() {
-    const commentList = $(gCommentsSection).find('li.selectable');
+function refreshAdvancedCommentsDelayed(commentsSection) {
+    const commentList = $(commentsSection).find('li.selectable');
 
     commentList.each(function(){
         const dateStr = $(this).find('.comment-time').first().text();
@@ -82,7 +81,8 @@ function refreshAdvancedCommentsDelayed() {
 
         const author = $(this).find('.header').first().text().replace('Added by: ', '').replace('Changed by: ', '');
 
-        const allowedRowTypes = ['Workflow Step', 'Assigned To', 'Sprint', 'Severity'];
+        // TODO: this should be configurable - exposed for the user in some settings panel
+        const allowedRowTypes = ['Workflow Step', 'Assigned To', /*'Sprint'*/, 'Severity'];
         let content = '';
 
         const table = $(this).find('table.changetable').find('tbody');
@@ -105,7 +105,7 @@ function refreshAdvancedCommentsDelayed() {
             addUberViewSimpleEvent(commentList.first(), author, dateStr, dateData, content);
     });
 
-    const newCommentList = $(gCommentsSection).find('li.selectable');
+    const newCommentList = $(commentsSection).find('li.selectable');
 
     const parent = newCommentList.first().parent();
     newCommentList.sort(function(a,b){
@@ -150,16 +150,19 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                         }
                         else if ($(this).parent().prev().children().first().text() == "Comments:") // Match comments viewer
                         {
-                            gCommentsSection = this;
+                            $(this).find('#sort').after('<li id="adv-comments-button" class="axo-menuitem-button"><a class="button button--basic button--small axo-menuitem-content">Uber View</a></li>')
 
-                            $(this).parent().prev().children().first().html(
-                                "Comments: <a " +
-                                "style=\"float: right; font-size: 9px; margin-top: -10px\" " +
-                                "id=\"adv-comments-button\" " +
-                                "class=\"button button--basic button--small axo-menuitem-content\">" +
-                                "Advanced</a>");
+                            const commentsSection = this;
+                            const commentLoadTimestamp = Date.now();
 
-                            $("#adv-comments-button").on('click', refreshAdvancedComments);
+                            $(this).find("#adv-comments-button").on('click', function() {
+                                refreshAdvancedComments(commentsSection, commentLoadTimestamp);
+                            });
+
+                            const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
+                            historyList.each(function(){
+                                $(this).find('.fa-plus-square-o')[0].click();
+                            });
 
                             commentsHandled = true;
                             if (descHandled)
