@@ -4,7 +4,7 @@ Confirmed to work in Opera with [Install Chrome Extensions plugin](https://addon
 
 ### Features
 * You can enable Uber View mode in the issue view
-  - Workflow Step, Severiy, Assigned To - changes to these events are injected to the comments section
+  - Workflow Step, Severity, Assigned To - changes to these fields are injected to the comments section
   - SVN commits are injected to the comments section
 * Improved comment section, both in the view issue window and in the side panel
   - Dead links are converted to hyperlinks
