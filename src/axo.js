@@ -175,7 +175,7 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                             const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
                             historyList.each(function(){
                                 const plus = $(this).find('.fa-plus-square-o');
-                                if (plus.children().length != 0)
+                                if (plus.length != 0)
                                     plus[0].click();
                             });
 
