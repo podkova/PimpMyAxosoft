@@ -34,15 +34,15 @@ function addUberViewEvent(afterElem, author, date, timestamp, content) {
 
 function addUberViewSimpleEvent(afterElem, author, date, timestamp, content) {
 
-    const newElem = $('<li class="axo-lightgrid-item selectable" data-timestamp="' + timestamp + '">' +
+    const newElem = $('<li class="axo-lightgrid-item selectable" data-timestamp="' + timestamp + '" style="background: #f6f8f9">' +
     '    <div class="comment-body htmlreset">' +
     '        <div class="comment-container">' +
     '            <div class="comment-content">' +
     '                <div class="comment-meta" style="text-align: left; padding: 3px; margin: 0px; ">' +
-    '                    <span class="comment-author" style="font-size: 11px; font-style: normal; max-width: inherit; vertical-align: sub;">' +
+    '                    <span class="comment-author" style="font-size: 11px; font-style: normal; max-width: inherit;">' +
     '                        <b>' + author + '</b> ' + content +
     '                    </span>' +
-    '                    <span class="comment-time" style="float: right; margin-right: 5px; font-size: 10px; font-style: italic">' + date + '</span>' +
+    '                    <span class="comment-time" style="margin-right: 5px; font-size: 10px; font-style: italic; color: #1c2933">' + date + '</span>' +
     '                </div>' +
     '            </div>' +
     '        </div>' +
@@ -112,7 +112,7 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
         const dateStr = $(this).find('.commit-date').text().trim().replace('On ', '').replace('at ', '');
         const dateData = Date.parse(dateStr.substring(3, 6) + dateStr.substring(0, 3) + dateStr.substring(6, 100)).toString();
 
-        const content = $(this).find('.message').text().replace('[axof: ' + issueId + '] ', '').replace('[axot: ' + issueId + '] ', '').replace('(rev: ', 'SVN commit <b>r').replace(')', '</b>: ');
+        const content = $(this).find('.message').text().replace('[axof: ' + issueId + '] ', '').replace('[axot: ' + issueId + '] ', '').replace('(rev: ', '&#9745; SVN commit <b>r').replace(')', '</b>: ');
 
         addUberViewSimpleEvent(commentList.first(), '', dateStr, dateData, content);
     });
@@ -206,7 +206,6 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                         var meta = $(this).next();
                         meta.css({ 'text-align' : 'left', 'padding' : '3px', 'margin' : '0', 'background' : '#d7e0e0' });
                         meta.find('.comment-author').css({ 'font-weight' : 'bold', 'font-size' : '12px', 'font-style' : 'normal', 'max-width' : 'inherit', 'vertical-align' : 'sub' });
-                        meta.find('.comment-time').css({ 'float' : 'right', 'margin-right' : '10px' });
 
                         // Move comment's text BELOW the comment's author
                         $(this).insertAfter(meta);
