@@ -34,7 +34,7 @@ function addUberViewEvent(afterElem, author, date, timestamp, content) {
 
 function addUberViewSimpleEvent(afterElem, author, date, timestamp, content) {
 
-    const newElem = $('<li class="axo-lightgrid-item selectable" data-timestamp="' + timestamp + '" style="background: #f6f8f9">' +
+    const newElem = $('<li class="axo-lightgrid-item selectable uber-view-event" data-timestamp="' + timestamp + '" style="background: #f6f8f9">' +
     '    <div class="comment-body htmlreset">' +
     '        <div class="comment-container">' +
     '            <div class="comment-content">' +
@@ -134,6 +134,16 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
         const ret = $(a).data('timestamp') < $(b).data('timestamp') ? -1 : 1;
         return ret;
     }).appendTo(parent);
+
+    uberViewEnabled = true;
+    $("#adv-comments-button").on('click', function() {
+        const uberViewEvents = $('.uber-view-event');
+        uberViewEnabled = !uberViewEnabled;
+        if (uberViewEnabled)
+            uberViewEvents.stop().fadeIn(200);
+        else
+            uberViewEvents.stop().fadeOut(200);
+    });
 }
 
 let sidePanelDescCallback = function(mutationsList, observer) {
