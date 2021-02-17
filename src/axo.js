@@ -61,7 +61,17 @@ function refreshAdvancedComments(commentsSection, commentLoadTimestamp) {
     if (actualTimeout <= 0)
         refreshAdvancedCommentsDelayed(commentsSection);
     else
-        setTimeout(() => { refreshAdvancedCommentsDelayed(commentsSection); }, actualTimeout);
+    {
+        $('#uber-view-progress-container').show();
+        $('#uber-view-progress-bar').animate({
+            width: 100
+        }, actualTimeout);
+
+        setTimeout(() => {
+            refreshAdvancedCommentsDelayed(commentsSection);
+            $('#uber-view-progress-container').fadeOut(500);
+        }, actualTimeout);
+    }
 }
 
 function refreshAdvancedCommentsDelayed(commentsSection) {
@@ -162,7 +172,15 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                         }
                         else if ($(this).parent().prev().children().first().text() == "Comments:") // Match comments viewer
                         {
-                            $(this).find('#sort').after('<li id="adv-comments-button" class="axo-menuitem-button"><a class="button button--basic button--small axo-menuitem-content">Uber View</a></li>')
+                            $(this).find('#sort')
+                                .after('<li style="vertical-align: middle; display: none" id="uber-view-progress-container">' +
+                                       '    <div style="width: 108px; background: #d7e0e0; border-radius: 4px; padding: 4px; height: 20px;">' +
+                                       '        <div style="background: #425f75; width: 0; height: 100%; border-radius: 2px;" id="uber-view-progress-bar"></div>' +
+                                       '    </div>' +
+                                       '</li>')
+                                .after('<li id="adv-comments-button" class="axo-menuitem-button">' +
+                                       '    <a class="button button--basic button--small axo-menuitem-content">Uber View</a>' +
+                                       '</li>');
 
                             const commentsSection = this;
                             const commentLoadTimestamp = Date.now();
