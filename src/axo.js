@@ -42,7 +42,7 @@ function addUberViewSimpleEvent(afterElem, author, date, timestamp, content) {
     '                    <span class="comment-author" style="font-size: 11px; font-style: normal; max-width: inherit;">' +
     '                        <b>' + author + '</b> ' + content +
     '                    </span>' +
-    '                    <span class="comment-time" style="margin-right: 5px; font-size: 10px; font-style: italic; color: #1c2933">' + date + '</span>' +
+    '                    <span class="comment-time" style="margin-right: 5px; font-size: 10px; font-style: italic; color: #1c2933; vertical-align: sub;">' + date + '</span>' +
     '                </div>' +
     '            </div>' +
     '        </div>' +
@@ -136,6 +136,7 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
     }).appendTo(parent);
 
     uberViewEnabled = true;
+
     $("#adv-comments-button").on('click', function() {
         const uberViewEvents = $('.uber-view-event');
         uberViewEnabled = !uberViewEnabled;
