@@ -1,8 +1,12 @@
 // https://stackoverflow.com/a/8943487
 let URL_REGEX =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+let ISSUE_REGEX = /( |^)((T|B)([1-9][0-9]*))/gm;
+
 function linkifyText(text) {
-    return text.includes('href') ? text : text.replace(URL_REGEX, function(url) {
+    return (text.includes('href') ? text : text.replace(URL_REGEX, function(url) {
         return '<a href="' + url + '">' + url + '</a>';
+    })).replace(ISSUE_REGEX, function(wholeMatch, prefix, issueId) {
+        return prefix + '<span class="issue-link" data-issue-type="' + issueId.substring(0, 1) + '" data-issue-id="' + issueId.substring(1) + '">' + issueId + '</span>';
     });
 }
 
@@ -11,6 +15,10 @@ function linkifyDOMElement(domElem) {
     var txt = jElem.html();
     txt = linkifyText(txt);
     jElem.html(txt);
+
+    jElem.find('.issue-link').not('.issue-link-handled').on('click', function() {
+        window.open('viewitem?id=' + $(this).data('issue-id') + '&type=' + ($(this).data('issue-type') == 'T' ? 'features' : 'tasks') + '&force_use_number=true');
+    }).addClass('issue-link-handled');
 }
 
 function addUberViewEvent(afterElem, author, date, timestamp, content) {
@@ -173,9 +181,7 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                             && $(this).find('#description').length == 0) // Discard description editor
                         {
                             // Convert dead links to hyperlinks
-                            let txt = $(this).html();
-                            txt = linkifyText(txt);
-                            $(this).html(txt);
+                            linkifyDOMElement(this);
 
                             descHandled = true;
                             if (commentsHandled)
@@ -252,14 +258,12 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
 };
 
 // Install the main observer
-let mainConfig = { childList: true, subtree: true, characterData: true, attributes: true};
-let mainObserver = new MutationObserver(mainCallback);
-let mainNode = document.getElementById('bottomLayout');
-mainObserver.observe(mainNode, mainConfig);
-
-// Fix style for links (prevents bolding and double underscore)
-let styleTag = $('<style>.comment-text a { border-bottom: 0 !important; font-weight: inherit !important; }</style>')
-$('html > head').append(styleTag);
+setTimeout(() => {
+    let mainConfig = { childList: true, subtree: true, characterData: true, attributes: true};
+    let mainObserver = new MutationObserver(mainCallback);
+    let mainNode = document.getElementById('bottomLayout');
+    mainObserver.observe(mainNode, mainConfig);
+}, 1000);
 
 // Remove formatting from copied text (e.g. green background when copying comments)
 document.addEventListener("paste", function(e) {
