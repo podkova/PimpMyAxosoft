@@ -2,7 +2,7 @@
 {
 	position: relative;
 	display: inline-block;
-	cursor: pointer;
+	text-decoration: none !important;
 
 	font-size: 80%;
 	color: #fff;
@@ -16,6 +16,18 @@
 	vertical-align: middle;
 	border-radius: 3px;
 	font-weight: 700;
+}
+
+.issue-link:hover
+{
+	color: #FFF !important;
+	text-decoration: underline !important;
+}
+
+.issue-link:visited
+{
+	color: #FFF !important;
+	text-decoration: none !important;
 }
 
 .issue-link .issue-bubble

@@ -6,7 +6,8 @@ function linkifyText(text) {
     return (text.includes('href') ? text : text.replace(URL_REGEX, function(url) {
         return '<a href="' + url + '">' + url + '</a>';
     })).replace(ISSUE_REGEX, function(wholeMatch, prefix, issueId) {
-        return prefix + '<span class="issue-link" data-issue-type="' + issueId.substring(0, 1) + '" data-issue-id="' + issueId.substring(1) + '">' + issueId + '</span>';
+        const url = 'viewitem?id=' + issueId.substring(1) + '&type=' + (issueId.substring(0, 1) == 'T' ? 'features' : 'tasks') + '&force_use_number=true';
+        return prefix + '<a href="' + url + '" class="issue-link">' + issueId + '</a>';
     });
 }
 
