@@ -21,26 +21,7 @@ function linkifyDOMElement(domElem) {
     }).addClass('issue-link-handled');
 }
 
-function addUberViewEvent(afterElem, author, date, timestamp, content) {
-
-    const newElem = $('<li style="margin-left: 25px" class="axo-lightgrid-item selectable" data-timestamp="' + timestamp + '">' +
-    '    <div class="comment-body htmlreset">' +
-    '        <div class="comment-container">' +
-    '            <div class="comment-content">' +
-    '                <div class="comment-meta" style="text-align: left; padding: 3px; margin: 0px; background: rgb(215, 224, 224);">' +
-    '                    <span class="comment-author" style="font-weight: bold; font-size: 12px; font-style: normal; max-width: inherit; vertical-align: sub;">' + author + '</span>' +
-    '                    <span class="comment-time" style="float: right; margin-right: 10px">' + date + '</span>' +
-    '                </div>' +
-    '                <div class="comment-text" style="padding: 4px 10px 4px 0px;">' + content + '</div>' +
-    '            </div>' +
-    '        </div>' +
-    '    </div>' +
-    '</li>');
-
-    newElem.insertAfter(afterElem);
-}
-
-function addUberViewSimpleEvent(afterElem, author, date, timestamp, content) {
+function addUberViewSimpleEvent(parent, author, date, timestamp, content) {
 
     const newElem = $('<li class="axo-lightgrid-item selectable uber-view-event" data-timestamp="' + timestamp + '" style="background: #f6f8f9">' +
     '    <div class="comment-body htmlreset">' +
@@ -57,12 +38,11 @@ function addUberViewSimpleEvent(afterElem, author, date, timestamp, content) {
     '    </div>' +
     '</li>');
 
-
-    newElem.insertAfter(afterElem);
+    parent.append(newElem);
 }
 
 function refreshAdvancedComments(commentsSection, commentLoadTimestamp) {
-    const minRequiredTimeout = 4000;
+    const minRequiredTimeout = 3000;
     const timePassed = Date.now() - commentLoadTimestamp;
     const actualTimeout = minRequiredTimeout - timePassed;
 
@@ -83,8 +63,9 @@ function refreshAdvancedComments(commentsSection, commentLoadTimestamp) {
 }
 
 function refreshAdvancedCommentsDelayed(commentsSection) {
-    const commentList = $(commentsSection).find('li.selectable');
+    const commentListParent = $(commentsSection).find('ul.axo-lightgrid-separatedlist');
 
+    const commentList = $(commentListParent).find('li.selectable');
     commentList.each(function(){
         const dateStr = $(this).find('.comment-time').first().text();
         const dateData = Date.parse(dateStr.substring(3, 6) + dateStr.substring(0, 3) + dateStr.substring(6, 100)).toString();
@@ -120,7 +101,7 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
             }
         });
         if (content.length != 0)
-            addUberViewSimpleEvent(commentList.first(), author, dateStr, dateData, content);
+            addUberViewSimpleEvent(commentListParent, author, dateStr, dateData, content);
     });
 
     // SVN commits list
@@ -132,10 +113,10 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
 
         const content = $(this).find('.message').text().replace('[axof: ' + issueId + '] ', '').replace('[axot: ' + issueId + '] ', '').replace('(rev: ', '&#9745; SVN commit <b>r').replace(')', '</b>: ');
 
-        addUberViewSimpleEvent(commentList.first(), '', dateStr, dateData, content);
+        addUberViewSimpleEvent(commentListParent, '', dateStr, dateData, content);
     });
 
-    const newCommentList = $(commentsSection).find('li.selectable');
+    const newCommentList = $(commentListParent).find('li.selectable');
 
     const parent = newCommentList.first().parent();
     newCommentList.sort(function(a,b){
@@ -153,6 +134,21 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
         else
             uberViewEvents.stop().fadeOut(200);
     });
+}
+
+function expandHistory() {
+    setTimeout(() => {
+        const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
+        if (historyList.length === 0)
+            expandHistory();
+        else {
+            historyList.each(function(){
+                const plus = $(this).find('.fa-plus-square-o');
+                if (plus.length != 0)
+                    plus[0].click();
+            });
+        }
+    }, 200);
 }
 
 let sidePanelDescCallback = function(mutationsList, observer) {
@@ -207,12 +203,7 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                                 refreshAdvancedComments(commentsSection, commentLoadTimestamp);
                             });
 
-                            const historyList = $('.yui3-historyaccordionui-content').find('li.selectable');
-                            historyList.each(function(){
-                                const plus = $(this).find('.fa-plus-square-o');
-                                if (plus.length != 0)
-                                    plus[0].click();
-                            });
+                            expandHistory();
 
                             commentsHandled = true;
                             if (descHandled)
