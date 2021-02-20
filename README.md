@@ -4,7 +4,7 @@ Confirmed to work in Opera with [Install Chrome Extensions plugin](https://addon
 
 ### Installation
 The most recent version of the plugin packed from master is always available in the [Chrome Web Store](https://chrome.google.com/webstore/detail/pimpmyaxosoft/fakpcamibelbbpgfldjdifjcjonakkgp).
-You can also download the source and load it to Chrome in the Developer Mode. It's very simple, and the steps to do it are described in the [Chrome Extensions Documentation](https://developer.chrome.com/docs/extensions/mv2/getstarted/#manifest). 
+You can also download the source and load it to Chrome in the Developer Mode. It's very simple, and the steps to do it are described in the [Chrome Extensions Documentation](https://developer.chrome.com/docs/extensions/mv2/getstarted/#manifest) (ignore the paragraph about creating the manifest and jump to steps).
 
 ### Features
 * You can enable Uber View mode in the issue view
