@@ -102,7 +102,7 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
     });
 
     // SVN commits list
-    const issueId = $('label.item-field-id').text().trim();
+    const issueId = $('label.item-field-id').data('issue-id');
     const commitList = $('.axo-sourcecontrolcommitui-content').find('li.commit');
     commitList.each(function(){
         const dateStr = $(this).find('.commit-date').text().trim().replace('On ', '').replace('at ', '');
@@ -240,10 +240,41 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                         linkifyDOMElement(this);
                     });
                 }
+                
             }
         }
     }
+
+    const issueIdLabel = $('label.item-field-id');
+    if (issueIdLabel.length == 1 && !issueIdLabel.data('issue-id'))
+    {
+        const issueType = $('#view-item-subtitle').text() == 'Bug' ? 'B' : 'T';
+
+        const issueId = issueIdLabel.text().trim();
+
+        issueIdLabel.data('issue-id', issueId);
+        issueIdLabel.data('issue-type', issueType);
+
+        const url = 'viewitem?id=' + issueId + '&type=' + (issueType == 'T' ? 'features' : 'tasks') + '&force_use_number=true';
+
+        issueIdLabel.text(issueType + issueId);
+        issueIdLabel.attr('title', 'Click to copy hyperlink to clipboard!')
+        issueIdLabel.css({ 'cursor' : 'copy', 'color' : '#607a8a' });
+        issueIdLabel.on('click', function() {
+            urlToClipboard(url, issueType + issueId);
+        });
+    }
 };
+
+function urlToClipboard(url, text)
+{
+    const html = '<a style="font-family: Arial" href="' + url + '">' + text + '</a>';
+    const item = new ClipboardItem({
+        'text/html' : new Blob([html], {type: 'text/html'}),
+        'text/plain' : new Blob([text], {type: 'text/plain'})
+    });
+    navigator.clipboard.write([item]);
+}
 
 // Install the main observer
 setTimeout(() => {
