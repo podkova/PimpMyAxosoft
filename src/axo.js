@@ -16,10 +16,6 @@ function linkifyDOMElement(domElem) {
     var txt = jElem.html();
     txt = linkifyText(txt);
     jElem.html(txt);
-
-    jElem.find('.issue-link').not('.issue-link-handled').on('click', function() {
-        window.open('viewitem?id=' + $(this).data('issue-id') + '&type=' + ($(this).data('issue-type') == 'T' ? 'features' : 'tasks') + '&force_use_number=true');
-    }).addClass('issue-link-handled');
 }
 
 function addUberViewSimpleEvent(parent, author, date, timestamp, content) {
