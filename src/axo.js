@@ -158,7 +158,15 @@ let sidePanelDescCallback = function(mutationsList, observer) {
     }
 }
 
-let durationCallback = function(mutationsList, sidePanelDescObserver) {
+let durationCallback = function(mutationsList, observer) {
+    processDuration(mutationsList, observer, true)
+}
+
+let durationNoPriorityCallback = function(mutationsList, observer) {
+    processDuration(mutationsList, observer, false)
+}
+
+function processDuration(mutationsList, observer, validatePriority) {
     for (var mutation of mutationsList)
     {
         if (mutation.type == 'childList')
@@ -182,13 +190,13 @@ let durationCallback = function(mutationsList, sidePanelDescObserver) {
 
                             if (sibling.dataset.column == "priority")
                             {
-                                if (jsibling.text() == "" || jsibling.text() == "Parent")
+                                if (validatePriority && (jsibling.text() == "" || jsibling.text() == "Parent"))
                                 {
                                     invalidData = true;
                                     break;
                                 }
                             }
-                            else if (sibling.dataset.column == "actual_duration")
+                            else if (sibling.dataset.column == "actual_duration" || sibling.dataset.column == "item.actual_duration")
                             {
                                 if (jsibling.text() == "")
                                 {
@@ -198,7 +206,7 @@ let durationCallback = function(mutationsList, sidePanelDescObserver) {
 
                                 actualDurationTxt = jsibling.text();
                             }
-                            else if (sibling.dataset.column == "estimated_duration")
+                            else if (sibling.dataset.column == "estimated_duration" || sibling.dataset.column == "item.estimated_duration")
                             {
                                 if (jsibling.text() == "")
                                 {
@@ -263,6 +271,12 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                     {
                         var config = { childList: true, subtree: true, characterData: true, attributes: true };
                         var observer = new MutationObserver(durationCallback);
+                        observer.observe(this, config);
+                    });
+                    $(node).find("[data-column='item.actual_duration']").each(function(index)
+                    {
+                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
+                        var observer = new MutationObserver(durationNoPriorityCallback);
                         observer.observe(this, config);
                     });
                 }
