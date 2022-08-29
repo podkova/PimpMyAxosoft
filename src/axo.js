@@ -79,7 +79,7 @@ function refreshAdvancedCommentsDelayed(commentsSection) {
 
         // TODO: this should be configurable - exposed for the user in some settings panel
         const allowedRowTypes = ['Workflow Step', 'Assigned To', /*'Sprint'*/, 'Severity'];
-        let content = '';
+        var content = '';
 
         const table = $(this).find('table.changetable').find('tbody');
         table.find('tr').each(function(){
@@ -158,17 +158,120 @@ let sidePanelDescCallback = function(mutationsList, observer) {
     }
 }
 
+let durationCallback = function(mutationsList, sidePanelDescObserver) {
+    for (var mutation of mutationsList)
+    {
+        if (mutation.type == 'childList')
+        {
+            for (var node of mutation.addedNodes)
+            {
+                if (node.nodeName == "#text")
+                {
+                    var jnode = $(node.parentNode);
+
+                    var invalidData = false;
+
+                    var actualDurationTxt = null;
+                    var estimatedDurationTxt = null;
+
+                    for (var sibling of jnode.parent().children())
+                    {
+                        if (sibling.hasAttribute('data-column'))
+                        {
+                            var jsibling = $(sibling)
+
+                            if (sibling.dataset.column == "priority")
+                            {
+                                if (jsibling.text() == "" || jsibling.text() == "Parent")
+                                {
+                                    invalidData = true;
+                                    break;
+                                }
+                            }
+                            else if (sibling.dataset.column == "actual_duration")
+                            {
+                                if (jsibling.text() == "")
+                                {
+                                    invalidData = true;
+                                    break;
+                                }
+
+                                actualDurationTxt = jsibling.text();
+                            }
+                            else if (sibling.dataset.column == "estimated_duration")
+                            {
+                                if (jsibling.text() == "")
+                                {
+                                    invalidData = true;
+                                    break;
+                                }
+
+                                estimatedDurationTxt = jsibling.text();
+                            }
+                        }
+                    }
+
+                    if (!invalidData)
+                    {
+                        var actualDurationTxtStripped = actualDurationTxt.replace(/[^0-9.]/g, '');
+                        var estimatedDurationTxtStripped = estimatedDurationTxt.replace(/[^0-9.]/g, '');
+
+                        var actualDuration = parseInt(actualDurationTxtStripped);
+                        var estimatedDuration = parseInt(estimatedDurationTxtStripped);
+
+                        var actualToEstimatedDuration = actualDuration/estimatedDuration;
+
+                        
+                        var newBackgroundColor = null;
+                        var newFontColor = null;
+
+                        if (actualToEstimatedDuration > 1.0 && actualToEstimatedDuration < 2.0)
+                        {
+                            newBackgroundColor = "#FFEF54";
+                        }
+                        else if (actualToEstimatedDuration >= 2.0 && actualToEstimatedDuration <= 5.0)
+                        {
+                            newBackgroundColor = "#FFBA5C";
+                        }
+                        else if (actualToEstimatedDuration > 5.0)
+                        {
+                            newBackgroundColor = "#FF5831";
+                            newFontColor = "white";
+                        }
+
+                        if (newBackgroundColor != null)
+                            jnode.css({ 'background' : newBackgroundColor });
+                        if (newFontColor != null)
+                            jnode.css({ 'color' : newFontColor });
+
+                    }
+                }
+            }
+        }
+    }
+}
+
 let mainCallback = function(mutationsList, sidePanelDescObserver) {
     for(var mutation of mutationsList) {
         if (mutation.type == 'childList') {
             for (var node of mutation.addedNodes)
             {
+                // Actual duration vs estimated duration
+                if (node.tagName == "DIV" && $(node).children().length > 0)
+                {
+                    $(node).find("[data-column='actual_duration']").each(function(index)
+                    {
+                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
+                        var observer = new MutationObserver(durationCallback);
+                        observer.observe(this, config);
+                    });
+                }
                 // Description - issue view
                 if (node.className == "item-field-table")
                 {
-                    let commentsHandled = false;
-                    let descHandled = false;
-                    let jnode = $(node);
+                    var commentsHandled = false;
+                    var descHandled = false;
+                    var jnode = $(node);
                     jnode.find("[class='field']").each(function(index){
                         if ($(this).parent().prev().children().first().text() == "Description:" // Match description editor and description viewer
                             && $(this).find('#description').length == 0) // Discard description editor
