@@ -259,6 +259,75 @@ function processDuration(mutationsList, observer, validatePriority) {
     }
 }
 
+function handleUberView(jnode)
+{
+    var commentsHandled = false;
+    var descHandled = false;
+
+    jnode.find("[class='field']").each(function(index){
+        if ($(this).parent().prev().children().first().text() == "Description:" // Match description editor and description viewer
+            && $(this).find('#description').length == 0) // Discard description editor
+        {
+            // Convert dead links to hyperlinks
+            linkifyDOMElement(this);
+
+            descHandled = true;
+            if (commentsHandled)
+                return false; // break each()
+        }
+        else if ($(this).parent().prev().children().first().text() == "Comments:") // Match comments viewer
+        {
+            $(this).find('#sort')
+                .after('<li style="vertical-align: middle; display: none" id="uber-view-progress-container">' +
+                       '    <div style="width: 108px; background: #d7e0e0; border-radius: 4px; padding: 4px; height: 20px;">' +
+                       '        <div style="background: #425f75; width: 0; height: 100%; border-radius: 2px;" id="uber-view-progress-bar"></div>' +
+                       '    </div>' +
+                       '</li>')
+                .after('<li id="adv-comments-button" class="axo-menuitem-button">' +
+                       '    <a class="button button--basic button--small axo-menuitem-content">Uber View</a>' +
+                       '</li>');
+
+            const commentsSection = this;
+            const commentLoadTimestamp = Date.now();
+
+            $(this).find("#adv-comments-button").on('click', function() {
+                $(this).unbind('click');
+                refreshAdvancedComments(commentsSection, commentLoadTimestamp);
+            });
+
+            expandHistory();
+
+            commentsHandled = true;
+            if (descHandled)
+                return false; // break each()                           
+        }
+    });
+}
+
+function handleComments(ulJnode)
+{
+    ulJnode.find(".comment-text").each(function(index){
+
+        // Move comment author's name to the left and make it more visible
+        // - bold
+        // - bigger
+        // - not italic
+        // - without length limit
+        var meta = $(this).next();
+        meta.css({ 'text-align' : 'left', 'padding' : '3px', 'margin' : '0', 'background' : '#d7e0e0' });
+        meta.find('.comment-author').css({ 'font-weight' : 'bold', 'font-size' : '12px', 'font-style' : 'normal', 'max-width' : 'inherit', 'vertical-align' : 'sub' });
+
+        // Move comment's text BELOW the comment's author
+        $(this).insertAfter(meta);
+
+        // Adjust text padding
+        $(this).css('padding', '4px 10px 4px 0px');
+
+        // Convert dead links to hyperlinks
+        linkifyDOMElement(this);
+    });
+}
+
 let mainCallback = function(mutationsList, sidePanelDescObserver) {
     for(var mutation of mutationsList) {
         if (mutation.type == 'childList') {
@@ -281,49 +350,10 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                     });
                 }
                 // Description - issue view
-                if (node.className == "item-field-table")
+                else if (node.className == "item-field-table")
                 {
-                    var commentsHandled = false;
-                    var descHandled = false;
                     var jnode = $(node);
-                    jnode.find("[class='field']").each(function(index){
-                        if ($(this).parent().prev().children().first().text() == "Description:" // Match description editor and description viewer
-                            && $(this).find('#description').length == 0) // Discard description editor
-                        {
-                            // Convert dead links to hyperlinks
-                            linkifyDOMElement(this);
-
-                            descHandled = true;
-                            if (commentsHandled)
-                                return false; // break each()
-                        }
-                        else if ($(this).parent().prev().children().first().text() == "Comments:") // Match comments viewer
-                        {
-                            $(this).find('#sort')
-                                .after('<li style="vertical-align: middle; display: none" id="uber-view-progress-container">' +
-                                       '    <div style="width: 108px; background: #d7e0e0; border-radius: 4px; padding: 4px; height: 20px;">' +
-                                       '        <div style="background: #425f75; width: 0; height: 100%; border-radius: 2px;" id="uber-view-progress-bar"></div>' +
-                                       '    </div>' +
-                                       '</li>')
-                                .after('<li id="adv-comments-button" class="axo-menuitem-button">' +
-                                       '    <a class="button button--basic button--small axo-menuitem-content">Uber View</a>' +
-                                       '</li>');
-
-                            const commentsSection = this;
-                            const commentLoadTimestamp = Date.now();
-
-                            $(this).find("#adv-comments-button").on('click', function() {
-                                $(this).unbind('click');
-                                refreshAdvancedComments(commentsSection, commentLoadTimestamp);
-                            });
-
-                            expandHistory();
-
-                            commentsHandled = true;
-                            if (descHandled)
-                                return false; // break each()                           
-                        }
-                    });
+                    handleUberView(jnode);
                 }
                 // Description - side panel
                 else if (node.id == "descriptionAccordionItem")
@@ -336,28 +366,8 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                 // Comments - everywhere
                 else if (node.tagName == "UL")
                 {
-                    $(node).find(".comment-text").each(function(index){
-
-                        // Move comment author's name to the left and make it more visible
-                        // - bold
-                        // - bigger
-                        // - not italic
-                        // - without length limit
-                        var meta = $(this).next();
-                        meta.css({ 'text-align' : 'left', 'padding' : '3px', 'margin' : '0', 'background' : '#d7e0e0' });
-                        meta.find('.comment-author').css({ 'font-weight' : 'bold', 'font-size' : '12px', 'font-style' : 'normal', 'max-width' : 'inherit', 'vertical-align' : 'sub' });
-
-                        // Move comment's text BELOW the comment's author
-                        $(this).insertAfter(meta);
-
-                        // Adjust text padding
-                        $(this).css('padding', '4px 10px 4px 0px');
-
-                        // Convert dead links to hyperlinks
-                        linkifyDOMElement(this);
-                    });
-                }
-                
+                    handleComments($(node));
+                }                
             }
         }
     }
@@ -394,11 +404,37 @@ function urlToClipboard(url, text)
 }
 
 // Install the main observer
-setTimeout(() => {
-    let mainConfig = { childList: true, subtree: true, characterData: true, attributes: true};
-    let mainObserver = new MutationObserver(mainCallback);
-    let mainNode = document.getElementById('bottomLayout');
-    mainObserver.observe(mainNode, mainConfig);
+setTimeout(() => {    
+    var mainConfig = { childList: true, subtree: true, characterData: true, attributes: true};
+    var mainObserver = new MutationObserver(mainCallback);
+    var mainNode = document.getElementById('bottomLayout');
+    if (mainNode != null)
+    {
+        console.log("'bottomLayout' node was found. PMA is enabled.")
+    }
+    else
+    {
+        console.log("'bottomLayout' node was not found. Trying to use 'body'...")
+        mainNode = document.getElementsByTagName('body')[0];
+
+        if (mainNode != null)
+        {
+            console.log("'body' found. PMA is enabled");
+        }
+        else
+        {
+            console.log("'body' was not found... PMA is disabled.")
+        }    
+    }
+    
+    if (mainNode != null)
+    {
+        $(mainNode).find(".item-field-table").each(function() { handleUberView($(this)); });
+        $(mainNode).find("ul").each(function() { handleComments($(this)); })
+
+        mainObserver.observe(mainNode, mainConfig);
+    }
+
 }, 1000);
 
 // Remove formatting from copied text (e.g. green background when copying comments)
