@@ -1,13 +1,17 @@
 {
     "name": "PimpMyAxosoft",
     "description": "Axosoft UI improvements: Uber View for issues, clickable links and issue IDs, better comments, no background on copy-paste.",
-    "version": "1.9",
+    "version": "1.10",
     "manifest_version": 3,
     "content_scripts": [{
         "matches": ["https://*.axosoft.com/*"],
         "js": ["jquery-3.5.1.min.js", "axo.js"],
         "css": ["axo.css"]
       }],
+    "permissions": ["downloads", "windows"],
+    "background": {
+      "service_worker": "background.js"
+    },
     "icons": {
       "128": "icon128.png"
     }
