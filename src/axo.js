@@ -1,13 +1,27 @@
+
+var debugLogsEnabled = false;
+
+chrome.storage.sync.get({ debugLogsEnabled: false }, function(items)
+{
+    debugLogsEnabled = items.debugLogsEnabled;
+});
+
+function debugLog(msg)
+{
+    if (debugLogsEnabled)
+        console.log(msg);
+}
+
 // https://stackoverflow.com/a/8943487
 let URL_REGEX =/(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-let ISSUE_REGEX = /( |^)((T|B)([1-9][0-9]*))/gm;
+let ISSUE_REGEX = /( |^|&nbsp;|>)((T|B|#)([1-9][0-9]*))/gm
 
 function linkifyText(text) {
     return (text.includes('href') ? text : text.replace(URL_REGEX, function(url) {
         return '<a href="' + url + '">' + url + '</a>';
     })).replace(ISSUE_REGEX, function(wholeMatch, prefix, issueId) {
         const url = 'viewitem?id=' + issueId.substring(1) + '&type=' + (issueId.substring(0, 1) == 'T' ? 'features' : 'tasks') + '&force_use_number=true';
-        return prefix + '<a href="' + url + '" class="issue-link">' + issueId + '</a>';
+        return prefix.charAt(prefix.length - 1) + '<a href="' + url + '" class="issue-link">' + issueId + '</a>';
     });
 }
 
@@ -333,24 +347,8 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
         if (mutation.type == 'childList') {
             for (var node of mutation.addedNodes)
             {
-                // Actual duration vs estimated duration
-                if (node.tagName == "DIV" && $(node).children().length > 0)
-                {
-                    $(node).find("[data-column='actual_duration']").each(function(index)
-                    {
-                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
-                        var observer = new MutationObserver(durationCallback);
-                        observer.observe(this, config);
-                    });
-                    $(node).find("[data-column='item.actual_duration']").each(function(index)
-                    {
-                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
-                        var observer = new MutationObserver(durationNoPriorityCallback);
-                        observer.observe(this, config);
-                    });
-                }
                 // Description - issue view
-                else if (node.className == "item-field-table")
+                if (node.className == "item-field-table")
                 {
                     var jnode = $(node);
                     handleUberView(jnode);
@@ -367,7 +365,23 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                 else if (node.tagName == "UL")
                 {
                     handleComments($(node));
-                }                
+                }
+                // Actual duration vs estimated duration
+                else if (node.tagName == "DIV" && $(node).children().length > 0)
+                {
+                    $(node).find("[data-column='actual_duration']").each(function(index)
+                    {
+                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
+                        var observer = new MutationObserver(durationCallback);
+                        observer.observe(this, config);
+                    });
+                    $(node).find("[data-column='item.actual_duration']").each(function(index)
+                    {
+                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
+                        var observer = new MutationObserver(durationNoPriorityCallback);
+                        observer.observe(this, config);
+                    });
+                }
             }
         }
     }
@@ -375,7 +389,8 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
     const issueIdLabel = $('label.item-field-id');
     if (issueIdLabel.length == 1 && !issueIdLabel.data('issue-id'))
     {
-        const issueType = $('#view-item-subtitle').text() == 'Bug' ? 'B' : 'T';
+        const issueTypeStr = $('#view-item-subtitle').text();
+        const issueType = issueTypeStr == 'Bug' ? 'B' : (issueTypeStr == 'Task' ? 'T' : '#');
 
         const issueId = issueIdLabel.text().trim();
 
@@ -410,20 +425,20 @@ setTimeout(() => {
     var mainNode = document.getElementById('bottomLayout');
     if (mainNode != null)
     {
-        console.log("'bottomLayout' node was found. PMA is enabled.")
+        debugLog("'bottomLayout' node was found. PMA is enabled.")
     }
     else
     {
-        console.log("'bottomLayout' node was not found. Trying to use 'body'...")
+        debugLog("'bottomLayout' node was not found. Trying to use 'body'...")
         mainNode = document.getElementsByTagName('body')[0];
 
         if (mainNode != null)
         {
-            console.log("'body' found. PMA is enabled");
+            debugLog("'body' found. PMA is enabled");
         }
         else
         {
-            console.log("'body' was not found... PMA is disabled.")
+            debugLog("'body' was not found... PMA is disabled.")
         }    
     }
     

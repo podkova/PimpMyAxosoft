@@ -12,10 +12,3 @@ videoElement.addEventListener('loadedmetadata', function(e)
     var marginHeight = 110;
     window.resizeTo(1280 + marginWidth, videoElement.videoHeight * 1280 / videoElement.videoWidth + marginHeight);
 });
-
-$(document).keydown(function(e) {
-    console.log(e.keyCode);
-    if (e.keyCode == 27) {
-        window.close();
-    }
-});
