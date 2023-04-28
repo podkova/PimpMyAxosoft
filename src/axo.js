@@ -238,8 +238,8 @@ function processDuration(mutationsList, observer, validatePriority) {
                         var actualDurationTxtStripped = actualDurationTxt.replace(/[^0-9.]/g, '');
                         var estimatedDurationTxtStripped = estimatedDurationTxt.replace(/[^0-9.]/g, '');
 
-                        var actualDuration = parseInt(actualDurationTxtStripped);
-                        var estimatedDuration = parseInt(estimatedDurationTxtStripped);
+                        var actualDuration = parseFloat(actualDurationTxtStripped);
+                        var estimatedDuration = parseFloat(estimatedDurationTxtStripped);
 
                         var actualToEstimatedDuration = actualDuration/estimatedDuration;
 
@@ -259,6 +259,10 @@ function processDuration(mutationsList, observer, validatePriority) {
                         {
                             newBackgroundColor = "#FF5831";
                             newFontColor = "white";
+                        }
+                        else if (actualDuration != 0)
+                        {
+                            newBackgroundColor = "#5CC447";
                         }
 
                         if (newBackgroundColor != null)
