@@ -50,3 +50,15 @@
 	border-bottom: 0 !important;
 	font-weight: inherit !important;
 }
+
+.blinking
+{
+	animation: blinker 1s linear infinite;
+}
+  
+@keyframes blinker
+{
+	50% {
+	  opacity: 0;
+	}
+}

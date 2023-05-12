@@ -1,9 +1,11 @@
 
 var debugLogsEnabled = false;
+var blinkingEnabled = true;
 
-chrome.storage.sync.get({ debugLogsEnabled: false }, function(items)
+chrome.storage.sync.get({ debugLogsEnabled: false, blinkingEnabled: true }, function(items)
 {
     debugLogsEnabled = items.debugLogsEnabled;
+    blinkingEnabled = items.blinkingEnabled;
 });
 
 function debugLog(msg)
@@ -180,6 +182,14 @@ let durationNoPriorityCallback = function(mutationsList, observer) {
     processDuration(mutationsList, observer, false)
 }
 
+let remainingDurationCallback = function(mutationsList, observer) {
+    processRemainingDuration(mutationsList, observer, true)
+}
+
+let remainingDurationNoPriorityCallback = function(mutationsList, observer) {
+    processRemainingDuration(mutationsList, observer, false)
+}
+
 function processDuration(mutationsList, observer, validatePriority) {
     for (var mutation of mutationsList)
     {
@@ -195,6 +205,7 @@ function processDuration(mutationsList, observer, validatePriority) {
 
                     var actualDurationTxt = null;
                     var estimatedDurationTxt = null;
+                    var remainingDurationTxt = null;
 
                     for (var sibling of jnode.parent().children())
                     {
@@ -270,6 +281,66 @@ function processDuration(mutationsList, observer, validatePriority) {
                         if (newFontColor != null)
                             jnode.css({ 'color' : newFontColor });
 
+                    }
+                }
+            }
+        }
+    }
+}
+
+function processRemainingDuration(mutationsList, observer, validatePriority) {
+    for (var mutation of mutationsList)
+    {
+        if (mutation.type == 'childList')
+        {
+            for (var node of mutation.addedNodes)
+            {
+                if (node.nodeName == "#text")
+                {
+                    var jnode = $(node.parentNode);
+
+                    var workflowFilterPassed = false;
+                    var remainingDurationZero = false;
+
+                    for (var sibling of jnode.parent().children())
+                    {
+                        if (sibling.hasAttribute('data-column'))
+                        {
+                            var jsibling = $(sibling)
+
+                            if (sibling.dataset.column == "workflow_step" || sibling.dataset.column == "item.workflow_step")
+                            {
+                                if (jsibling.text() == "To Do" || jsibling.text() == "In Progress" || jsibling.text() == "Backlog")
+                                {
+                                    workflowFilterPassed = true;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else if (sibling.dataset.column == "remaining_duration" || sibling.dataset.column == "item.remaining_duration")
+                            {
+                                if (jsibling.text() == "0")
+                                {
+                                    remainingDurationZero = true;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (workflowFilterPassed && remainingDurationZero)
+                    {
+                        jnode.css({ 'background' : "#F00", 'color' : "#FFF" });
+                        if (blinkingEnabled)
+                            jnode.html("<span class=\"blinking\">ESTIMATE THIS!</span>");
+                        else
+                            jnode.text("ESTIMATE THIS!");
+                        jnode.attr('title', "This issue needs estimation: it has 0 remaining estimate and is not closed.");
                     }
                 }
             }
@@ -383,6 +454,18 @@ let mainCallback = function(mutationsList, sidePanelDescObserver) {
                     {
                         var config = { childList: true, subtree: true, characterData: true, attributes: true };
                         var observer = new MutationObserver(durationNoPriorityCallback);
+                        observer.observe(this, config);
+                    });
+                    $(node).find("[data-column='remaining_duration']").each(function(index)
+                    {
+                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
+                        var observer = new MutationObserver(remainingDurationCallback);
+                        observer.observe(this, config);
+                    });
+                    $(node).find("[data-column='item.remaining_duration']").each(function(index)
+                    {
+                        var config = { childList: true, subtree: true, characterData: true, attributes: true };
+                        var observer = new MutationObserver(remainingDurationNoPriorityCallback);
                         observer.observe(this, config);
                     });
                 }
