@@ -407,7 +407,15 @@ function handleComments(ulJnode)
         meta.find('.comment-author').css({ 'font-weight' : 'bold', 'font-size' : '12px', 'font-style' : 'normal', 'max-width' : 'inherit', 'vertical-align' : 'sub' });
 
         // Move comment's text BELOW the comment's author
-        $(this).insertAfter(meta);
+        var commentText = $(this).text();
+        var commentLines = commentText.split('\n');
+        var commentHtml = '';
+
+        for (var i = 0; i < commentLines.length; i++) {
+            commentHtml += '<div>' + commentLines[i] + '</div>';
+        }
+
+        $(this).empty().html(commentHtml).insertAfter(meta);
 
         // Adjust text padding
         $(this).css('padding', '4px 10px 4px 0px');
